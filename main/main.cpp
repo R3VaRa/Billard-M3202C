@@ -100,7 +100,8 @@ void initBalle()
 
 /*************************************************************************
  *  Calcule de la taille du terrain En fonction de la taille de l'ecran  *
- *  
+ *     initalisation de la balle en fonction de la taille du terrain     *
+ *        placement des trous/murs et dimmentionement de ceux-ci         *
  *************************************************************************/
 void initTerrain()
 {
@@ -157,16 +158,20 @@ void initTerrain()
 	}
 }
 
+/*******************************************************************************************
+ *  Initalisation de la taille de la queue de billard en fonction de la taille du terrain  *
+ *******************************************************************************************/
 void initQueue()
 {
-	Q.X = B.X + B.D / 2;
-	Q.Y = B.Y + B.D / 2;
 	Q.L = 1;
 	Q.l = T.X * 0.55;
 	Q.Draw.setSize(Vector2f(Q.L, Q.l));
 	Q.Draw.setFillColor(Color(222, 184, 135, 255));
 }
 
+/***********************************************************
+ *  Initalisation du rectange de force pour l'utilisateur  *
+ ***********************************************************/
 void initForce()
 {
 	Q.F.L = Q.F.Fmax * 100;
@@ -182,6 +187,9 @@ void initForce()
 }
 #pragma endregion
 
+/*******************************************************************************************************
+ *  Calcul de l'angle de départ selon ou est positionner la souris par rapport au milieu  de la balle  *
+ *******************************************************************************************************/
 float angleQueueBillard()
 {
 	Vector2f S;
@@ -197,12 +205,18 @@ float angleQueueBillard()
 	}
 }
 
+/**********************************************************************************
+ *  Calcule du vecteur vitesse selon la force et la ralentis rebond et air/tapis  *
+ **********************************************************************************/
 void calculeVitesse()
 {
 	B.V.X = cos(B.A * M_PI / 180.0) * B.V.R * Q.F.F;
 	B.V.Y = sin(B.A * M_PI / 180.0) * B.V.R * Q.F.F;
 }
 
+/*************************************************************************
+ *  Variation de la force entre 0 et 1 (correspondant a un pourcentage)  * 
+ *************************************************************************/
 void forceQueue()
 {
 	if (!Q.F.moins)
@@ -219,6 +233,9 @@ void forceQueue()
 	}
 }
 
+/*************************************************************
+ *  Lancement de la balle remise a 1 le facteur de ralentie  *
+ *************************************************************/
 void Lancer()
 {
 	B.V.R = 1.0;
@@ -255,11 +272,20 @@ void rebondMur()
 	}
 }
 
+/*************************************************************************
+ *  Reduction de la Vitesse en réduisant Vitesse.Ralentisement de 0.05%  *
+ *                        Facteur air/tapis                              *
+ *************************************************************************/
 void facteurAirTapis()
 {
 	B.V.R = B.V.R * 0.9995;
 }
 
+/************************************************************************************************
+ *    Le deplacement se fait avec le vecteur vitesse en pisitif sur la position de la balle     *
+ *         Aplication de la reduction air/tapis verification s'il doit avoir un rebond          *
+ *  Recalcule de la vitesse (car reduction de la vitesse du au facteur air/tapis et au rebond)  *
+ ************************************************************************************************/
 void deplacement()
 {
 	B.X = B.X + B.V.X;
@@ -270,8 +296,10 @@ void deplacement()
 	calculeVitesse();
 }
 
-
-void tmpDraw()
+/**************************************************************
+ *  Affichage du terrain, des murs, des trous et de la balle  *
+ **************************************************************/
+void mursTrousDraw()
 {
 	window.draw(T.Draw);
 	for (int i = 0; i < 4; i++)
@@ -282,6 +310,9 @@ void tmpDraw()
 	window.draw(B.Draw);
 }
 
+/**************************************************
+ *  Affichage de la force dans un rectangle bleu  *
+ **************************************************/
 void forceDraw()
 {
 	for (int i = 0; i < 4; i++)
@@ -291,7 +322,10 @@ void forceDraw()
 	window.draw(Q.F.Draw);
 }
 
-void actualisationforce()
+/********************************************************
+ *  Actualisation de la position du rectangle de force  *
+ ********************************************************/
+void actualisationForceDraw()
 {
 	Q.F.X = Mouse::getPosition().x + 15;
 	Q.F.Y = Mouse::getPosition().y;
@@ -312,6 +346,9 @@ void actualisationforce()
 	Q.F.Draw.setFillColor(Color(255*Q.F.F, 255 * (1 - Q.F.F), 0, 255));
 }
 
+/*******
+ *  T  *
+ *******/
 void SCR_Init();
 void dansLeTrou()
 {
@@ -340,6 +377,9 @@ void dansLeTrou()
 /*******************************************************************************
 *********************************** SCRIPT *************************************
 ********************************************************************************/
+/*******
+ *  D  *
+ *******/
 void SCR_draw()
 {
 	window.clear();
@@ -358,6 +398,9 @@ void SCR_draw()
 	window.display();
 }
 
+/*******
+ *  C  *
+ *******/
 void SCR_calcul()
 {
 	if (!Start)
@@ -365,7 +408,7 @@ void SCR_calcul()
 		Q.Draw.setPosition(B.X + B.D / 2, B.Y + B.D / 2);
 		Q.Draw.setRotation(angleQueueBillard() + 90);
 		forceQueue();
-		actualisationforce();
+		actualisationForceDraw();
 	}
 	if (Mouse::isButtonPressed(Mouse::Right) && !Start)
 	{
@@ -384,6 +427,10 @@ void SCR_calcul()
 		}
 	}
 }
+
+/*******
+ *  E  *
+ *******/
 void SCR_Event()
 {
 	// Process events
@@ -402,6 +449,9 @@ void SCR_Event()
 	}
 }
 
+/*******
+ *  I  *
+ *******/
 void SCR_Init()
 {
 	initTerrain();
@@ -413,7 +463,9 @@ void SCR_Init()
 ************************************ MAIN **************************************
 ********************************************************************************/
 
-
+/*******
+ *  M  *
+ *******/
 int main(int, char const**)
 {
 	window.setFramerateLimit(400);
